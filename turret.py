@@ -509,9 +509,14 @@ class Turret(object):
 
 camera = picamera.PiCamera()
 camera.resolution = (320, 240)
+output = np.empty((240,320,3), dtype=np.uint8)
 t = Turret(camera, friendly_mode=False)
 t.calibrate()
-t.motion_detection(show_video=False)
+while(True){
+    camera.capture(output,format='bgr')
+    t.motion_detection_rasp(output,show_video=False)
+
+}
 
 '''user_input = raw_input("Choose an input mode: (1) Motion Detection, (2) Interactive\n")
 
