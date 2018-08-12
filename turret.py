@@ -25,10 +25,8 @@ from Adafruit_MotorHAT import Adafruit_MotorHAT, Adafruit_DCMotor, Adafruit_Step
 ### User Parameters ###
 
 MOTOR_X_REVERSED = True
-MOTOR_Y_REVERSED = False
 
 MAX_STEPS_X = 30
-MAX_STEPS_Y = 15
 
 RELAY_PIN = 22
 
@@ -257,11 +255,6 @@ class Turret(object):
         self.sm_x.setSpeed(5)                       # 5 RPM
         self.current_x_steps = 0
 
-        # Stepper motor 2
-        self.sm_y = self.mh.getStepper(200, 2)      # 200 steps/rev, motor port #2
-        self.sm_y.setSpeed(5)                       # 5 RPM
-        self.current_y_steps = 0
-
 
         # Relay
         GPIO.setmode(GPIO.BCM)
@@ -317,36 +310,6 @@ class Turret(object):
                 print( "Error: Unable to calibrate turret. Exiting...")
                 sys.exit(1)'''
 
-    def __calibrate_y_axis(self):
-        """
-        Waits for input to calibrate the y axis.
-        :return:
-        """
-        with raw_mode(sys.stdin):
-            try:
-                while True:
-                    ch = sys.stdin.read(1)
-                    if not ch:
-                        break
-
-                    if ch == "w":
-                        if MOTOR_Y_REVERSED:
-                            Turret.move_forward(self.sm_y, 5)
-                        else:
-                            Turret.move_backward(self.sm_y, 5)
-                    elif ch == "s":
-                        if MOTOR_Y_REVERSED:
-                            Turret.move_backward(self.sm_y, 5)
-                        else:
-                            Turret.move_forward(self.sm_y, 5)
-                    elif ch == "\n":
-                        break
-
-            except (KeyboardInterrupt, EOFError):
-                print ("Error: Unable to calibrate turret. Exiting...")
-                sys.exit(1)
-
-        return
     def motion_detection(self, show_video=False):
         """
         Uses the camera to move the turret. OpenCV ust be configured to use this.
@@ -367,13 +330,11 @@ class Turret(object):
 
         # find height
         target_steps_x = (2*MAX_STEPS_X * (x + w / 2) / v_w) - MAX_STEPS_X
-        target_steps_y = (2*MAX_STEPS_Y*(y+h/2) / v_h) - MAX_STEPS_Y
 
-        print ("x: %s, y: %s" % (str(target_steps_x), str(target_steps_y)))
-        print ("current x: %s, current y: %s" % (str(self.current_x_steps), str(self.current_y_steps)))
+        print ("x: %s" % (str(target_steps_x)))
+        print ("current x: %s" % (str(self.current_x_steps)))
 
         t_x = threading.Thread()
-        t_y = threading.Thread()
         t_fire = threading.Thread()
 
         # move x
@@ -390,32 +351,13 @@ class Turret(object):
                 t_x = threading.Thread(target=Turret.move_backward, args=(self.sm_x, 2,))
             else:
                 t_x = threading.Thread(target=Turret.move_forward, args=(self.sm_x, 2,))
-        '''
-        # move y
-        if (target_steps_y - self.current_y_steps) > 0:
-            self.current_y_steps += 1
-            if MOTOR_Y_REVERSED:
-                t_y = threading.Thread(target=Turret.move_backward, args=(self.sm_y, 2,))
-            else:
-                t_y = threading.Thread(target=Turret.move_forward, args=(self.sm_y, 2,))
-        elif (target_steps_y - self.current_y_steps) < 0:
-            self.current_y_steps -= 1
-            if MOTOR_Y_REVERSED:
-                t_y = threading.Thread(target=Turret.move_forward, args=(self.sm_y, 2,))
-            else:
-                t_y = threading.Thread(target=Turret.move_backward, args=(self.sm_y, 2,))
-        '''
-        # fire if necessary
-        if not self.friendly_mode:
-            if abs(target_steps_y - self.current_y_steps) <= 2 and abs(target_steps_x - self.current_x_steps) <= 2:
-                t_fire = threading.Thread(target=Turret.fire)
+
+
 
         t_x.start()
-        t_y.start()
         t_fire.start()
 
         t_x.join()
-        t_y.join()
         t_fire.join()
 
     def interactive(self):
@@ -425,7 +367,6 @@ class Turret(object):
         """
 
         Turret.move_forward(self.sm_x, 1)
-        Turret.move_forward(self.sm_y, 1)
 
         print ('Commands: Pivot with (a) and (d). Tilt with (w) and (s). Exit with (q)\n')
         with raw_mode(sys.stdin):
@@ -435,17 +376,7 @@ class Turret(object):
                     if not ch or ch == "q":
                         break
 
-                    if ch == "w":
-                        if MOTOR_Y_REVERSED:
-                            Turret.move_forward(self.sm_y, 5)
-                        else:
-                            Turret.move_backward(self.sm_y, 5)
-                    elif ch == "s":
-                        if MOTOR_Y_REVERSED:
-                            Turret.move_backward(self.sm_y, 5)
-                        else:
-                            Turret.move_forward(self.sm_y, 5)
-                    elif ch == "a":
+                    if ch == "a":
                         if MOTOR_X_REVERSED:
                             Turret.move_backward(self.sm_x, 5)
                         else:
@@ -509,7 +440,6 @@ class Turret(object):
 
 camera = picamera.PiCamera()
 camera.resolution = (320, 240)
-output = np.empty((240,320,3), dtype=np.uint8)
 t = Turret(camera, friendly_mode=False)
 t.calibrate()
 while(True):
