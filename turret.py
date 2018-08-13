@@ -161,7 +161,7 @@ class Turret(object):
         '''print ("Calibration finished.")'''
 
 
-    def motion_detection_rasp(self, frame, show_video=False):
+    def motion_detection_rasp(self, frame):
         """
         Uses the camera to move the turret. OpenCV ust be configured to use this.
         :return:
@@ -265,14 +265,14 @@ class Turret(object):
 #if __name__ == "__main__":
 '''an example nopw'''
 
-camera = picamera.PiCamera()
+'''camera = picamera.PiCamera()
 camera.resolution = (320, 240)
 t = Turret(camera)
 t.calibrate()
 while(True):
     camera.capture(output,format='bgr')
-    t.motion_detection_rasp(output,show_video=False)
-
+    t.motion_detection_rasp(output)
+'''
 
 '''user_input = raw_input("Choose an input mode: (1) Motion Detection, (2) Interactive\n")
 

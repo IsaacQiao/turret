@@ -107,7 +107,9 @@ def face_detection_sec(img, firebase, faceCascade, logger):
 camera = picamera.PiCamera()
 camera.resolution = (320, 240)
 output = np.empty((240, 320, 3), dtype=np.uint8)
-#t = Turret(camera, friendly_mode=False)
+t = Turret(camera, friendly_mode=False)
+t.calibrate()
+
 # Load a sample picture and learn how to recognize it.
 
 # Initialize some variables
@@ -130,7 +132,10 @@ while True:
     # Find all the faces and face encodings in the current frame of video
     '''Thread for facial recongition'''
     face_thread = threading.Thread(target=face_detection_sec, args=(output, firebase, faceCascade, logger))
+    turret_thread = threading.Thread(target=t.motion_detection_rasp, args=(output))
+    
     face_thread.start()
+    turret_thread.start()
     #start_new_thread(face_detection_sec,(output, firebase, faceCascade, logger,))#not used
     '''thread for moving platform'''
     #turret_thread = threading.Thread(target=t.motion_detection_rasp, args=(output,False))
