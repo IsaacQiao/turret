@@ -120,7 +120,7 @@ result = firebase.get_calibration()
 print(result)
 
 #face detection
-cascPath = "/home/pi/face_recognition/haarcascade_frontalface_default.xml"
+cascPath = "/home/pi/Desktop/source/turret/haarcascade_frontalface_default.xml"
 # Create the haar cascade
 faceCascade = cv2.CascadeClassifier(cascPath)
 
@@ -136,6 +136,9 @@ while True:
     
     face_thread.start()
     turret_thread.start()
+
+    face_thread.join()
+    turret_thread.join()
     #start_new_thread(face_detection_sec,(output, firebase, faceCascade, logger,))#not used
     '''thread for moving platform'''
     #turret_thread = threading.Thread(target=t.motion_detection_rasp, args=(output,False))
