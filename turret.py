@@ -62,123 +62,6 @@ class VideoUtils(object):
         self.prev_frame = ''
         self.tempFrame = ''
 
-
-    def live_video(self, camera_port=0):
-        """
-        Opens a window with live video.
-        :param camera:
-        :return:
-        """
-
-        #video_capture = cv2.VideoCapture(camera_port)
-		#video_capture =
-        #myfile = open('test.jpg', 'wb')
-        #camera.capture(myfile)
-        #myfile.close()
-        #img = cv2.imread('test.jpg')
-        with picamera.array.PiRGBArray(self.camera) as stream:
-            self.camera.capture(stream, format = 'bgr')
-            img = stream.array
-
-        while True:
-            # Capture frame-by-frame
-            #ret, frame = video_capture.read()
-
-            # Display the resulting frame
-            cv2.imshow('Video', img)
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-
-        # When everything is done, release the capture
-        #video_capture.release()
-        cv2.destroyAllWindows()
-
-
-
-    def find_motion(self, callback=0, camera_port=0, show_video=False):
-
-        '''camera = cv2.VideoCapture(camera_port)'''
-        '''stream = io.BytesIO()'''
-        #camera.start_preview()
-        time.sleep(2)
-        with picamera.array.PiRGBArray(self.camera) as stream:
-            self.camera.capture(stream, format = 'bgr')
-            image = stream.array
-        time.sleep(0.25)
-
-        # initialize the first frame in the video stream
-        firstFrame = None
-        tempFrame = None
-        count = 0
-
-        # loop over the frames of the video
-        while True:
-            # grab the current frame and initialize the occupied/unoccupied
-            # text
-
-            #(grabbed, frame) = camera.read()
-            frame = image
-
-            # resize the frame, convert it to grayscale, and blur it
-            frame = imutils.resize(frame, width=500)
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            gray = cv2.GaussianBlur(gray, (21, 21), 0)
-
-            # if the first frame is None, initialize it
-            if firstFrame is None:
-                print ("Waiting for video to adjust...")
-                if tempFrame is None:
-                    tempFrame = gray
-                    continue
-                else:
-                    delta = cv2.absdiff(tempFrame, gray)
-                    tempFrame = gray
-                    tst = cv2.threshold(delta, 5, 255, cv2.THRESH_BINARY)[1]
-                    tst = cv2.dilate(tst, None, iterations=2)
-                    if count > 30:
-                        print ("Done.\n Waiting for motion.")
-                        if not cv2.countNonZero(tst) > 0:
-                            firstFrame = gray
-                        else:
-                            print ('not done')
-                            continue
-                    else:
-                        count += 1
-                        continue
-
-            # compute the absolute difference between the current frame and
-            # first frame
-            frameDelta = cv2.absdiff(firstFrame, gray)
-            print(frameDelta)
-            thresh = cv2.threshold(frameDelta, 25, 255, cv2.THRESH_BINARY)[1]
-
-            # dilate the thresholded image to fill in holes, then find contours
-            # on thresholded image
-            thresh = cv2.dilate(thresh, None, iterations=2)
-            c = self.VideoUtils.get_best_contour(thresh.copy(), 5000)
-
-            if c is not None:
-                # compute the bounding box for the contour, draw it on the frame,
-                # and update the text
-                (x, y, w, h) = cv2.boundingRect(c)
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                callback(c, frame)
-
-
-            # show the frame and record if the user presses a key
-            if show_video:
-                cv2.imshow("Security Feed", frame)
-                key = cv2.waitKey(1) & 0xFF
-
-                # if the `q` key is pressed, break from the lop
-                if key == ord("q"):
-                    break
-
-        # cleanup the camera and close any open windows
-        camera.release()
-        cv2.destroyAllWindows()
-
     def rasp_find_motion(self, stream, callback=0):
 
         frame = stream
@@ -241,8 +124,7 @@ class Turret(object):
     Class used for turret control.
     """
 
-    def __init__(self, camera, friendly_mode=True):
-        self.friendly_mode = friendly_mode
+    def __init__(self, camera):
         self.camera = camera
         self.VideoUtils = VideoUtils(camera)
 
@@ -274,48 +156,10 @@ class Turret(object):
 
         print( "Please calibrate the yaw of the gun so that it aligns with the camera. Commands: (a) moves left, " \
               "(d) moves right. Press (enter) to finish.\n")'''
-        self.__calibrate_x_axis()
+        Turret.move_backward(self.sm_x, 5)
 
         '''print ("Calibration finished.")'''
 
-
-    def __calibrate_x_axis(self):
-        """
-        Waits for input to calibrate the x axis
-        :return:
-        """ 
-        Turret.move_backward(self.sm_x, 5)
-
-        '''with raw_mode(sys.stdin):
-            try:
-                while True:
-                    ch = sys.stdin.read(1)
-                    if not ch:
-                        break
-
-                    elif ch == "a":
-                        if MOTOR_X_REVERSED:
-                            Turret.move_backward(self.sm_x, 5)
-                        else:
-                            Turret.move_forward(self.sm_x, 5)
-                    elif ch == "d":
-                        if MOTOR_X_REVERSED:
-                            Turret.move_forward(self.sm_x, 5)
-                        else:
-                            Turret.move_backward(self.sm_x, 5)
-                    elif ch == "\n":
-                        break
-
-            except (KeyboardInterrupt, EOFError):
-                print( "Error: Unable to calibrate turret. Exiting...")
-                sys.exit(1)'''
-
-    def motion_detection(self, show_video=False):
-        """
-        Uses the camera to move the turret. OpenCV ust be configured to use this.
-        :return:
-        """
-        self.VideoUtils.find_motion(self.__move_axis, show_video=show_video)
 
     def motion_detection_rasp(self, frame, show_video=False):
         """
@@ -337,9 +181,9 @@ class Turret(object):
         t_x = threading.Thread()
 
         # move x
-        print(target_steps_x)
 
         stprs_diff = int(target_steps_x - self.current_x_steps)
+        print(stprs_diff)
 
         if (target_steps_x - self.current_x_steps) > 1:
             self.current_x_steps += stprs_diff
@@ -347,20 +191,6 @@ class Turret(object):
         elif (target_steps_x - self.current_x_steps) < -1:
             self.current_x_steps += stprs_diff
             t_x = threading.Thread(target=Turret.move_backward, args=(self.sm_x, -stprs_diff-1,))
-        '''if (target_steps_x - self.current_x_steps) > 0:
-            self.current_x_steps += 1
-            if MOTOR_X_REVERSED:
-                t_x = threading.Thread(target=Turret.move_forward, args=(self.sm_x, 2,))
-            else:
-                t_x = threading.Thread(target=Turret.move_backward, args=(self.sm_x, 2,))
-        elif (target_steps_x - self.current_x_steps) < 0:
-            self.current_x_steps -= 1
-            if MOTOR_X_REVERSED:
-                t_x = threading.Thread(target=Turret.move_backward, args=(self.sm_x, 2,))
-            else:
-                t_x = threading.Thread(target=Turret.move_forward, args=(self.sm_x, 2,))
-        '''
-
 
         t_x.start()
 
@@ -398,15 +228,6 @@ class Turret(object):
             except (KeyboardInterrupt, EOFError):
                 pass
 
-    @staticmethod
-    def fire():
-        #uncomment
-        '''
-        GPIO.output(RELAY_PIN, GPIO.HIGH)
-        time.sleep(1)
-        GPIO.output(RELAY_PIN, GPIO.LOW)
-        '''
-        return
 
     @staticmethod
     def move_forward(motor, steps):
@@ -446,7 +267,7 @@ class Turret(object):
 
 camera = picamera.PiCamera()
 camera.resolution = (320, 240)
-t = Turret(camera, friendly_mode=False)
+t = Turret(camera)
 t.calibrate()
 while(True):
     camera.capture(output,format='bgr')
