@@ -22,9 +22,9 @@ from firebase_server import *
 FORMAT = '%(asctime)-15s %(clientip)s %(user)-8s %(message)s'
 logging.basicConfig(filename='log.log',format=FORMAT)
 logger = logging.getLogger(__name__)
-file_location = "/home/pi/Desktop/source/turret/test/"
-ref_location = "/home/pi/Desktop/source/turret/ref/"
-intruder_location = "/home/pi/Desktop/source/turret/Intruder/"
+file_location = "/home/pi/face_recognition/test/"
+ref_location = "/home/pi/face_recognition/ref/"
+intruder_location = "/home/pi/face_recognition/Intruder/"
 def face_detection_sec(img, firebase, faceCascade, logger):
     #face_locations = face_recognition.face_locations(img)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -47,7 +47,7 @@ def face_detection_sec(img, firebase, faceCascade, logger):
         for (x, y, w, h) in faces:
             file_name = file_location + "test_{}.jpg".format(x)
             cv2.imwrite(file_name, img[y:(h+y), x:(w+x)])
-        return_Val = subprocess.call("/home/pi/Desktop/source/turret/facial_rec > facial.log", shell=True)
+        return_Val = subprocess.call("/home/pi/face_recognition/facial_rec > facial.log", shell=True)
         print(return_Val)
         #checks if start of calibration mode
         if firebase.get_calibration() and firebase.calibration_pass == 0:
@@ -120,7 +120,7 @@ result = firebase.get_calibration()
 print(result)
 
 #face detection
-cascPath = "/home/pi/Desktop/source/turret/haarcascade_frontalface_default.xml"
+cascPath = "/home/pi/face_recognition/haarcascade_frontalface_default.xml"
 # Create the haar cascade
 faceCascade = cv2.CascadeClassifier(cascPath)
 
