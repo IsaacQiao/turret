@@ -132,10 +132,10 @@ while True:
     # Find all the faces and face encodings in the current frame of video
     '''Thread for facial recongition'''
     face_thread = threading.Thread(target=face_detection_sec, args=(output, firebase, faceCascade, logger))
-    #turret_thread = threading.Thread(target=t.motion_detection_rasp, args=(output))
+    turret_thread = threading.Thread(target=t.motion_detection_rasp, args=(output))
     
     face_thread.start()
-    #turret_thread.start()
+    turret_thread.start()
 
     #face_thread.join()
     #turret_thread.join()
