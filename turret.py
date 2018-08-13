@@ -335,11 +335,19 @@ class Turret(object):
         print ("current x: %s" % (str(self.current_x_steps)))
 
         t_x = threading.Thread()
-        t_fire = threading.Thread()
 
         # move x
         print(target_steps_x)
-        if (target_steps_x - self.current_x_steps) > 0:
+
+        stprs_diff = int(target_steps_x - self.current_x_steps)
+
+        if (target_steps_x - self.current_x_steps) > 1:
+            self.current_x_steps += stprs_diff
+            t_x = threading.Thread(target=Turret.move_forward, args=(self.sm_x, stprs_diff+1,))
+        elif (target_steps_x - self.current_x_steps) < -1:
+            self.current_x_steps += stprs_diff
+            t_x = threading.Thread(target=Turret.move_backward, args=(self.sm_x, -stprs_diff-1,))
+        '''if (target_steps_x - self.current_x_steps) > 0:
             self.current_x_steps += 1
             if MOTOR_X_REVERSED:
                 t_x = threading.Thread(target=Turret.move_forward, args=(self.sm_x, 2,))
@@ -351,14 +359,12 @@ class Turret(object):
                 t_x = threading.Thread(target=Turret.move_backward, args=(self.sm_x, 2,))
             else:
                 t_x = threading.Thread(target=Turret.move_forward, args=(self.sm_x, 2,))
-
+        '''
 
 
         t_x.start()
-        t_fire.start()
 
         t_x.join()
-        t_fire.join()
 
     def interactive(self):
         """
