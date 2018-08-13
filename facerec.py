@@ -107,7 +107,7 @@ def face_detection_sec(img, firebase, faceCascade, logger):
 camera = picamera.PiCamera()
 camera.resolution = (320, 240)
 output = np.empty((240, 320, 3), dtype=np.uint8)
-t = Turret(camera, friendly_mode=False)
+t = Turret(camera)
 t.calibrate()
 
 # Load a sample picture and learn how to recognize it.
