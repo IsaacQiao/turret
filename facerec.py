@@ -109,7 +109,7 @@ camera.resolution = (320, 240)
 output = np.empty((240, 320, 3), dtype=np.uint8)
 t = Turret(camera)
 t.calibrate()
-
+#t = Turret(camera, friendly_mode=False)
 # Load a sample picture and learn how to recognize it.
 
 # Initialize some variables
@@ -136,9 +136,6 @@ while True:
     
     face_thread.start()
     turret_thread.start()
-
-    #face_thread.join()
-    #turret_thread.join()
     #start_new_thread(face_detection_sec,(output, firebase, faceCascade, logger,))#not used
     '''thread for moving platform'''
     #turret_thread = threading.Thread(target=t.motion_detection_rasp, args=(output,False))
