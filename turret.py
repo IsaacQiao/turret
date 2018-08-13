@@ -149,16 +149,7 @@ class Turret(object):
         Waits for input to calibrate the turret's axis
         :return:
         """
-        '''print( "Please calibrate the tilt of the gun so that it is level. Commands: (w) moves up, " \
-              "(s) moves down. Press (enter) to finish.\n")
-        #uncomment for y
-        #self.__calibrate_y_axis()
-
-        print( "Please calibrate the yaw of the gun so that it aligns with the camera. Commands: (a) moves left, " \
-              "(d) moves right. Press (enter) to finish.\n")'''
         Turret.move_backward(self.sm_x, 5)
-
-        '''print ("Calibration finished.")'''
 
 
     def motion_detection_rasp(self, frame):
@@ -261,31 +252,3 @@ class Turret(object):
         self.mh.getMotor(3).run(Adafruit_MotorHAT.RELEASE)
         self.mh.getMotor(4).run(Adafruit_MotorHAT.RELEASE)
         return
-
-#if __name__ == "__main__":
-'''an example nopw'''
-
-'''camera = picamera.PiCamera()
-camera.resolution = (320, 240)
-t = Turret(camera)
-t.calibrate()
-while(True):
-    camera.capture(output,format='bgr')
-    t.motion_detection_rasp(output)
-'''
-
-'''user_input = raw_input("Choose an input mode: (1) Motion Detection, (2) Interactive\n")
-
-if user_input == "1":
-    t.calibrate()
-    if raw_input("Live video? (y, n)\n").lower() == "y":
-        t.motion_detection(show_video=False)#change to true later mayb
-    else:
-        t.motion_detection()
-elif user_input == "2":
-    if raw_input("Live video? (y, n)\n").lower() == "y":
-        _thread.start_new__thread(self.VideoUtils.live_video, ())
-    t.interactive()
-else:
-    print ("Unknown input mode. Please choose a number (1) or (2)")
-'''
