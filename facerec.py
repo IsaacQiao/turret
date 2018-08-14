@@ -113,8 +113,11 @@ def fire_check(firebase,temp):
         if os.path.isfile(file_path):
             #new fire img
             msg = "Fire Detected {}".format(time.strftime("%Y/%m/%d at %H:%M:%S"))
-            firebase.send_fire_alarm(file_path, msg)
+            result = firebase.send_fire_picture(file_path, msg)
+            print(result)
+            firebase.alert_fire()
             os.unlink(file_path)
+
 
 # Get a reference to the Raspberry Pi camera.
 # If this fails, make sure you have a camera connected to the RPi and that you

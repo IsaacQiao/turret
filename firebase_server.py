@@ -115,11 +115,15 @@ class firebase_server():
         self.firebase.patch('/', {'Owner': False})
 
 
-    def send_fire_alarm(self, src, msg):
+    def send_fire_picture(self, src, msg):
         #PUSH
         picture_name = "fire{}.png".format(time.strftime("%Y%m%d-%H%M%S"))
         self.upload_picture(src, picture_name)
         self.firebase.patch('/FireAlarm', {'Info': msg, 'PicName': picture_name})
+        return picture_name
+
+    
+    def alert_fire(self):    
         #NOTIFICATION
         message_title = "FIRE"
         message_body = "FIRE HAS BEEN DETECTED"
