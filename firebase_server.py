@@ -113,3 +113,19 @@ class firebase_server():
 
     def owner_off(self):
         self.firebase.patch('/', {'Owner': False})
+
+
+    def send_fire_alarm(self, src, msg):
+        #PUSH
+        picture_name = "fire{}.png".format(time.strftime("%Y%m%d-%H%M%S"))
+        self.upload_picture(src, picture_name)
+        self.firebase.patch('/FireAlarm', {'Info': msg, 'PicName': picture_name})
+        #NOTIFICATION
+        message_title = "FIRE"
+        message_body = "FIRE HAS BEEN DETECTED"
+        self.firebase.patch('/', {'Fire': 'off'})
+        self.push_service.notify_single_device(registration_id=self.registration_id, message_title=message_title,
+                                                       message_body=message_body)
+
+    def get_fire(self):
+        return self.firebase.get('/Fire', None)

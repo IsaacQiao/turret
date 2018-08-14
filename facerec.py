@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 file_location = "/home/pi/face_recognition/test/"
 ref_location = "/home/pi/face_recognition/ref/"
 intruder_location = "/home/pi/face_recognition/Intruder/"
+fire_location = "/home/pi/LeptonModule/"
 def face_detection_sec(img, firebase, faceCascade, logger):
     #face_locations = face_recognition.face_locations(img)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -99,7 +100,21 @@ def face_detection_sec(img, firebase, faceCascade, logger):
             except Exception as e:
                 print(e)
 
-
+def fire_check(firebase):
+    folder = fire_location
+    if(firebase.get_fire() == False):
+            for the_file in os.listdir(folder):
+                if(the_file=="fire.jpg"):
+                    file_path = os.path.join(folder, the_file)
+                    os.unlink(file_path)
+    else:
+        folder = file_location
+        file_path = os.path.join(folder, "fire.jpg")
+        if os.path.isfile(file_path):
+            #new fire img
+            msg = "Fire Detected {}".format(time.strftime("%Y/%m/%d at %H:%M:%S"))
+            firebase.send_fire_alarm(file_path, msg)
+            os.unlink(file_path)
 
 # Get a reference to the Raspberry Pi camera.
 # If this fails, make sure you have a camera connected to the RPi and that you
@@ -131,11 +146,13 @@ while True:
 
     # Find all the faces and face encodings in the current frame of video
     '''Thread for facial recongition'''
-    face_thread = threading.Thread(target=face_detection_sec, args=(output, firebase, faceCascade, logger))
-    turret_thread = threading.Thread(target=t.motion_detection_rasp, args=(output,))
-    
-    face_thread.start()
-    turret_thread.start()
+    #face_thread = threading.Thread(target=face_detection_sec, args=(output, firebase, faceCascade, logger))
+    #turret_thread = threading.Thread(target=t.motion_detection_rasp, args=(output,))
+    fire_thread = threading.Thread(target=fire_check, args=(firebase))
+
+    fire_thread.start()
+    #face_thread.start()
+    #turret_thread.start()
 
     #face_thread.join()
     #turret_thread.join()
