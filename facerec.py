@@ -122,8 +122,8 @@ def fire_check(firebase,temp):
 camera = picamera.PiCamera()
 camera.resolution = (320, 240)
 output = np.empty((240, 320, 3), dtype=np.uint8)
-t = Turret(camera)
-t.calibrate()
+#t = Turret(camera)
+#t.calibrate()
 
 # Load a sample picture and learn how to recognize it.
 
@@ -141,7 +141,7 @@ faceCascade = cv2.CascadeClassifier(cascPath)
 count_turrent = 0
 while True:
     camera.capture(output, format='bgr')
-    count_turrent = count_turrent+1
+    #count_turrent = count_turrent+1
 
 
     # Find all the faces and face encodings in the current frame of video
