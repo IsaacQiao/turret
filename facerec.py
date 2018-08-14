@@ -100,7 +100,7 @@ def face_detection_sec(img, firebase, faceCascade, logger):
             except Exception as e:
                 print(e)
 
-def fire_check(firebase):
+def fire_check(firebase,temp):
     folder = fire_location
     if(firebase.get_fire() == False):
             for the_file in os.listdir(folder):
@@ -138,21 +138,23 @@ print(result)
 cascPath = "/home/pi/face_recognition/haarcascade_frontalface_default.xml"
 # Create the haar cascade
 faceCascade = cv2.CascadeClassifier(cascPath)
-
+count_turrent = 0
 while True:
     camera.capture(output, format='bgr')
-
+    count_turrent = count_turrent+1
 
 
     # Find all the faces and face encodings in the current frame of video
     '''Thread for facial recongition'''
     #face_thread = threading.Thread(target=face_detection_sec, args=(output, firebase, faceCascade, logger))
-    #turret_thread = threading.Thread(target=t.motion_detection_rasp, args=(output,))
-    fire_thread = threading.Thread(target=fire_check, args=(firebase))
+    fire_thread = threading.Thread(target=fire_check, args=(firebase,"temp string"))
 
     fire_thread.start()
     #face_thread.start()
-    #turret_thread.start()
+    # if count_turrent>1:
+    #     count_turrent=0
+        #turret_thread = threading.Thread(target=t.motion_detection_rasp, args=(output,))
+        #turret_thread.start()
 
     #face_thread.join()
     #turret_thread.join()
