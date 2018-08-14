@@ -103,12 +103,11 @@ def face_detection_sec(img, firebase, faceCascade, logger):
 def fire_check(firebase,temp):
     folder = fire_location
     if(firebase.get_fire() == False):
-            for the_file in os.listdir(folder):
-                if(the_file=="fire.jpg"):
-                    file_path = os.path.join(folder, the_file)
-                    os.unlink(file_path)
+        for the_file in os.listdir(folder):
+            if(the_file=="fire.jpg"):
+                file_path = os.path.join(folder, the_file)
+                os.unlink(file_path)
     else:
-        folder = file_location
         file_path = os.path.join(folder, "fire.jpg")
         if os.path.isfile(file_path):
             #new fire img
@@ -117,6 +116,8 @@ def fire_check(firebase,temp):
             print(result)
             firebase.alert_fire()
             os.unlink(file_path)
+        else:
+            print("no fire")
 
 
 # Get a reference to the Raspberry Pi camera.
